@@ -9,7 +9,7 @@ contract Lottery is VRFConsumerBase {
     uint256 public fee;
     bytes32 public keyHash;
     uint256 public randomResult;
-	uint256 public MAX_PLAYERS = 5;
+    uint256 public MAX_PLAYERS = 5;
 
     constructor(
         address _vrfCoordinator,
