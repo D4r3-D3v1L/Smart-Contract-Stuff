@@ -1,7 +1,9 @@
 use dotenv::dotenv;
 use ethers::prelude::*;
 use ethers::utils::hex;
-use mongodb::{Client, Collection};
+use reqwest::Url;
+use reqwest::{blocking::Client, Error};
+use serde_json::json;
 use std::convert::TryFrom;
 use std::env;
 use std::fs::{File, OpenOptions};
@@ -17,6 +19,7 @@ async fn main() -> anyhow::Result<()> {
     let project_id = env::var("PROJECT_ID").expect("PROJECT_ID not found in .env");
     let target_amount = env::var("TARGET_AMOUNT").expect("TARGET_AMOUNT not found in .env");
     let target_amount = U256::from_dec_str(&target_amount).unwrap();
+    let webhook = env::var("WEBHOOKURL").expect("WEBHOOKURL not found in .env");
 
     // Connect to the Ethereum network using Infura
     let provider =
@@ -52,6 +55,8 @@ async fn main() -> anyhow::Result<()> {
 
                     file.write_all(txn_string.as_bytes())?;
                     println!("{}", txn_string);
+
+                    send_webhook(&webhook, &txn_string).await;
                 }
             }
         }
@@ -62,4 +67,12 @@ async fn main() -> anyhow::Result<()> {
 
 fn format_address(address: H160) -> String {
     format!("0x{}", hex::encode(address.as_fixed_bytes()))
+}
+
+async fn send_webhook(webhook_url: &str, message: &str) -> Result<(), Error> {
+    let client = reqwest::Client::new();
+    let body = json!({ "content": message });
+    let response = client.post(webhook_url).json(&body).send().await?;
+
+    Ok(())
 }
