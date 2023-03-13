@@ -1,1 +1,1 @@
-
+A monitoring tool for the Ethereum blockchain that detects potentially malicious transactions based on their transaction amount. By setting a target amount, the tool can identify transactions that exceed that amount, which may indicate a potential hack or fraud.
